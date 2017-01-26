@@ -43,6 +43,8 @@ public class Chess extends JFrame {
     private int newlocationX, newlocationY;
     private boolean pressed;
     private boolean playerW, playerB;
+    private boolean[][] movingTiles = new boolean[8][8];
+    private boolean[][] killingTiles = new boolean[8][8];
     
     public Chess() {
         initValues();
@@ -52,7 +54,7 @@ public class Chess extends JFrame {
     
     private void initValues() {
         playerW = true;
-        playerB = false;        
+        playerB = false;
     }
     
     private void initUI() {
@@ -78,7 +80,7 @@ public class Chess extends JFrame {
         paint();
         add(panelGame);
     }
-
+    
     private void initBar() {
         bar = new JMenuBar();
         menuGame = new JMenu("Game");
@@ -101,40 +103,15 @@ public class Chess extends JFrame {
         @Override
         public void actionPerformed(ActionEvent evt) {
             if(!pressed) {
-                String tile = null;
                 getPos(evt);
-                
-                if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONwKing) {
-                    tile = "wKing";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONwQueen) {
-                    tile = "wQueen";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONwBishop) {
-                    tile = "wBishop";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONwKnight) {
-                    tile = "wKnight";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONwRook) {
-                    tile = "wRook";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONwPawn) {
-                    tile = "wPawn";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONbKing) {
-                    tile = "bKing";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONbQueen) {
-                    tile = "bQueen";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONbBishop) {
-                    tile = "bBishop";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONbKnight) {
-                    tile = "bKnight";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONbRook) {
-                    tile = "bRook";
-                } else if (Chess.TILES[locationX][locationY].getIcon() == Chess.ICONbPawn) {
-                    tile = "bPawn";
-                }
-                
                 setAllNull();
                 Chess.TILES[locationX][locationY].setEnabled(true);
-                
-                setMovingTiles(tile);
-                setKillingTiles(tile);
+                setMovingTilesFalse();
+                setKillingTilesFalse();
+                getMovingTiles(getTile(locationX, locationY), locationX, locationY);
+                setMovingTiles();
+                getKillingTiles(getTile(locationX, locationY), locationX, locationY);
+                setKillingTiles();
                 pressed = true;
             } else {
                 getPos(evt);
@@ -447,7 +424,7 @@ public class Chess extends JFrame {
         Chess.TILES[0][5].setIcon(Chess.ICONbBishop);
         Chess.TILES[0][6].setIcon(Chess.ICONbKnight);
         Chess.TILES[0][7].setIcon(Chess.ICONbRook);
-        for(int i =0; i < 8; i++)Chess.TILES[1][i].setIcon(Chess.ICONbPawn);
+        for(int i = 0; i < 8; i++)Chess.TILES[1][i].setIcon(Chess.ICONbPawn);
         
         // WHITE
         Chess.TILES[7][0].setIcon(Chess.ICONwRook);
@@ -458,7 +435,7 @@ public class Chess extends JFrame {
         Chess.TILES[7][5].setIcon(Chess.ICONwBishop);
         Chess.TILES[7][6].setIcon(Chess.ICONwKnight);
         Chess.TILES[7][7].setIcon(Chess.ICONwRook);
-        for(int i =0; i < 8; i++)Chess.TILES[6][i].setIcon(Chess.ICONwPawn);
+        for(int i = 0; i < 8; i++)Chess.TILES[6][i].setIcon(Chess.ICONwPawn);
     }
     
     // PLAYER TURNS
@@ -514,6 +491,22 @@ public class Chess extends JFrame {
         }
     }
     
+    private void setMovingTilesFalse() {
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                movingTiles[i][j] = false;
+            }
+        }
+    }
+    
+    private void setKillingTilesFalse() {
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                killingTiles[i][j] = false;
+            }
+        }
+    }
+    
     private void setAllNull() {
         for(int i = 0; i < 8; i++) {
             for(int j = 0; j < 8; j++) {
@@ -535,13 +528,8 @@ public class Chess extends JFrame {
     private void setWhiteTrue() {
         for(int i = 0; i < 8; i++) {
             for(int j = 0; j < 8; j++) {
-                if (Chess.TILES[i][j].getIcon() == Chess.ICONwBishop
-                    || Chess.TILES[i][j].getIcon() == Chess.ICONwKing
-                    || Chess.TILES[i][j].getIcon() == Chess.ICONwKnight
-                    || Chess.TILES[i][j].getIcon() == Chess.ICONwPawn
-                    || Chess.TILES[i][j].getIcon() == Chess.ICONwQueen
-                    || Chess.TILES[i][j].getIcon() == Chess.ICONwRook) {
-                Chess.TILES[i][j].setEnabled(true);
+                if (isWhite(i, j)) {
+                    Chess.TILES[i][j].setEnabled(true);
                 }
             }
         }
@@ -550,7 +538,9 @@ public class Chess extends JFrame {
     private void setWhiteFalse() {
         for(int i = 0; i < 8; i++) {
             for(int j = 0; j < 8; j++) {
-                if (isWhite(i, j)) Chess.TILES[i][j].setEnabled(false);                
+                if (isWhite(i, j)) {
+                    Chess.TILES[i][j].setEnabled(false);
+                }                
             }
         }
     }
@@ -573,56 +563,83 @@ public class Chess extends JFrame {
         }
     }
     
-    private void setMovingTiles(String tile) {
-        
+    private void setMovingTiles() {
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                if(movingTiles[i][j]) {
+                    Chess.TILES[i][j].setBackground(Color.YELLOW);
+                }
+            }
+        }
+    }
+    
+    private void setKillingTiles() {
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
+                if(killingTiles[i][j]) {
+                    Chess.TILES[i][j].setBackground(Color.RED);
+                }
+            }
+        }
+    }
+    
+    private void getMovingTiles(String tile, int posx, int posy) {
         switch(tile) {
         // WHITE
             case "wKing":
-                if(locationX != 7) {
-                    if(Chess.TILES[locationX + 1][locationY].getIcon() == null) {
-                        setup(locationX + 1, locationY, "move");
+                // ABAJO
+                if(posx != 7) {
+                    if(Chess.TILES[posx + 1][posy].getIcon() == null) {
+                        setup(posx + 1, posy, "move");
                     }                   
                 }
-
-                if(locationX != 0) {
-                    if(Chess.TILES[locationX - 1][locationY].getIcon() == null) {
-                        setup(locationX - 1, locationY, "move");
+                
+                // ARRIBA
+                if(posx != 0) {                    
+                    if(Chess.TILES[posx - 1][posy].getIcon() == null) {
+                        setup(posx - 1, posy, "move");
+                    }                                        
+                }
+                
+                // DERECHA
+                if(posy != 7) {
+                    if(Chess.TILES[posx][posy + 1].getIcon() == null) {                    
+                        setup(posx, posy + 1, "move");
                     }                    
                 }
-
-                if(locationY != 7) {
-                    if(Chess.TILES[locationX][locationY + 1].getIcon() == null) {                    
-                        setup(locationX, locationY + 1, "move");
-                    }                    
-                }
-
-                if(locationY != 0) {
-                    if(Chess.TILES[locationX][locationY - 1].getIcon() == null) {
-                        setup(locationX, locationY - 1, "move");          
+                
+                // IZQUIERDA
+                if(posy != 0) {
+                    if(Chess.TILES[posx][posy - 1].getIcon() == null) {
+                        setup(posx, posy - 1, "move");          
                     }                   
                 }
-
-                if(locationX != 7 && locationY != 7) {
-                    if(Chess.TILES[locationX + 1][locationY + 1].getIcon() == null) {
-                       setup(locationX + 1, locationY + 1, "move");
+                
+                // ABAJO DERECHA
+                if(posx != 7 && posy != 7) {
+                    if(Chess.TILES[posx + 1][posy + 1].getIcon() == null) {
+                       setup(posx + 1, posy + 1, "move");
                     }                  
                 }
-
-                if(locationX != 7 && locationY != 0) {
-                    if(Chess.TILES[locationX + 1][locationY - 1].getIcon() == null) {
-                       setup(locationX + 1, locationY - 1, "move");
+                
+                // ABAJO IZQUIERDA
+                if(posx != 7 && posy != 0) {
+                    if(Chess.TILES[posx + 1][posy - 1].getIcon() == null) {
+                       setup(posx + 1, posy - 1, "move");
                     }                  
                 }
-
-                if(locationX != 0 && locationY != 7) {
-                    if(Chess.TILES[locationX - 1][locationY + 1].getIcon() == null) {
-                       setup(locationX - 1, locationY + 1, "move");
+                
+                // ARRIBA DERECHA
+                if(posx != 0 && posy != 7) {
+                    if(Chess.TILES[posx - 1][posy + 1].getIcon() == null) {
+                       setup(posx - 1, posy + 1, "move");
                     }                  
                 }
-
-                if(locationX != 0 && locationY != 0) {
-                    if(Chess.TILES[locationX - 1][locationY - 1].getIcon() == null) {
-                       setup(locationX - 1, locationY - 1, "move");
+                
+                // ARRIBA IZQUIERDA
+                if(posx != 0 && posy != 0) {
+                    if(Chess.TILES[posx - 1][posy - 1].getIcon() == null) {
+                       setup(posx - 1, posy - 1, "move");
                     }                
                 }
             break;
@@ -630,10 +647,10 @@ public class Chess extends JFrame {
             case "wQueen":
                 // BISHOP FUNC
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY + i].getIcon() == null) {
-                            setup(locationX + i, locationY + i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy + i].getIcon() == null) {
+                            setup(posx + i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -641,10 +658,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY - i].getIcon() == null) {
-                            setup(locationX - i, locationY - i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy - i].getIcon() == null) {
+                            setup(posx - i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -652,10 +669,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY - i].getIcon() == null) {
-                            setup(locationX + i, locationY - i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy - i].getIcon() == null) {
+                            setup(posx + i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -663,10 +680,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY + i].getIcon() == null) {
-                            setup(locationX - i, locationY + i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy + i].getIcon() == null) {
+                            setup(posx - i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -675,9 +692,9 @@ public class Chess extends JFrame {
                 
                 // ROOK FUNC
                 for(int i = 1; i < 8; i++) {
-                    if( ( (locationX + i) >= 0 && (locationX + i) <= 7 ) ) {
-                        if(Chess.TILES[locationX + i][locationY].getIcon() == null) {
-                            setup(locationX + i, locationY, "move");
+                    if( ( (posx + i) >= 0 && (posx + i) <= 7 ) ) {
+                        if(Chess.TILES[posx + i][posy].getIcon() == null) {
+                            setup(posx + i, posy, "move");
                         } else {
                             break;
                         }
@@ -685,9 +702,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY].getIcon() == null) {
-                            setup(locationX - i, locationY, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy].getIcon() == null) {
+                            setup(posx - i, posy, "move");
                         } else {
                             break;
                         }
@@ -695,9 +712,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ( (locationY + i) >= 0 && (locationY + i) <= 7 ) ) {
-                        if(Chess.TILES[locationX][locationY + i].getIcon() == null) {
-                            setup(locationX, locationY + i, "move");
+                    if( ( (posy + i) >= 0 && (posy + i) <= 7 ) ) {
+                        if(Chess.TILES[posx][posy + i].getIcon() == null) {
+                            setup(posx, posy + i, "move");
                         } else {
                             break;
                         }
@@ -705,9 +722,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX][locationY - i].getIcon() == null) {
-                            setup(locationX, locationY - i, "move");
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx][posy - i].getIcon() == null) {
+                            setup(posx, posy - i, "move");
                         } else {
                             break;
                         }
@@ -717,10 +734,10 @@ public class Chess extends JFrame {
 
             case "wBishop":
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY + i].getIcon() == null) {
-                            setup(locationX + i, locationY + i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy + i].getIcon() == null) {
+                            setup(posx + i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -728,10 +745,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY - i].getIcon() == null) {
-                            setup(locationX - i, locationY - i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy - i].getIcon() == null) {
+                            setup(posx - i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -739,10 +756,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY - i].getIcon() == null) {
-                            setup(locationX + i, locationY - i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy - i].getIcon() == null) {
+                            setup(posx + i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -750,10 +767,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY + i].getIcon() == null) {
-                            setup(locationX - i, locationY + i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy + i].getIcon() == null) {
+                            setup(posx - i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -762,59 +779,59 @@ public class Chess extends JFrame {
             break;
 
             case "wKnight":                
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7)
-                        && ((locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(Chess.TILES[locationX - 2][locationY + 1].getIcon() == null) {
-                        setup(locationX - 2, locationY + 1, "move");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7)
+                        && ((posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(Chess.TILES[posx - 2][posy + 1].getIcon() == null) {
+                        setup(posx - 2, posy + 1, "move");
                     }
                 }
                 
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7)
-                        && ((locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(Chess.TILES[locationX - 2][locationY - 1].getIcon() == null) {
-                        setup(locationX - 2, locationY - 1, "move");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7)
+                        && ((posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(Chess.TILES[posx - 2][posy - 1].getIcon() == null) {
+                        setup(posx - 2, posy - 1, "move");
                     }
                 }
                 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ((locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(Chess.TILES[locationX + 2][locationY + 1].getIcon() == null) {
-                        setup(locationX + 2, locationY + 1, "move");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ((posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(Chess.TILES[posx + 2][posy + 1].getIcon() == null) {
+                        setup(posx + 2, posy + 1, "move");
                     }
                 }
 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ((locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(Chess.TILES[locationX + 2][locationY - 1].getIcon() == null) {
-                        setup(locationX + 2, locationY - 1, "move");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ((posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(Chess.TILES[posx + 2][posy - 1].getIcon() == null) {
+                        setup(posx + 2, posy - 1, "move");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ((locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(Chess.TILES[locationX + 1][locationY + 2].getIcon() == null) {
-                        setup(locationX + 1, locationY + 2, "move");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ((posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(Chess.TILES[posx + 1][posy + 2].getIcon() == null) {
+                        setup(posx + 1, posy + 2, "move");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(Chess.TILES[locationX + 1][locationY - 2].getIcon() == null) {
-                        setup(locationX + 1, locationY - 2, "move");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(Chess.TILES[posx + 1][posy - 2].getIcon() == null) {
+                        setup(posx + 1, posy - 2, "move");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(Chess.TILES[locationX - 1][locationY + 2].getIcon() == null) {
-                        setup(locationX - 1, locationY + 2, "move");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(Chess.TILES[posx - 1][posy + 2].getIcon() == null) {
+                        setup(posx - 1, posy + 2, "move");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(Chess.TILES[locationX - 1][locationY - 2].getIcon() == null) {                        
-                        setup(locationX - 1, locationY - 2, "move");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(Chess.TILES[posx - 1][posy - 2].getIcon() == null) {                        
+                        setup(posx - 1, posy - 2, "move");
                     }
                 }
             break;
@@ -822,9 +839,9 @@ public class Chess extends JFrame {
             case "wRook":                
                 // ABAJO
                 for(int i = 1; i <= 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY].getIcon() == null) {
-                            setup(locationX + i, locationY, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy].getIcon() == null) {
+                            setup(posx + i, posy, "move");
                         } else {
                             break;
                         }
@@ -833,9 +850,9 @@ public class Chess extends JFrame {
                 
                 // ARRIBA
                 for(int i = 1; i <= 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY].getIcon() == null) {
-                            setup(locationX - i, locationY, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy].getIcon() == null) {
+                            setup(posx - i, posy, "move");
                         } else {
                             break;
                         }
@@ -844,9 +861,9 @@ public class Chess extends JFrame {
                 
                 // DERECHA
                 for(int i = 1; i <= 8; i++) {
-                    if( ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX][locationY + i].getIcon() == null) {
-                            setup(locationX, locationY + i, "move");
+                    if( ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx][posy + i].getIcon() == null) {
+                            setup(posx, posy + i, "move");
                         } else {
                             break;
                         }
@@ -855,9 +872,9 @@ public class Chess extends JFrame {
                 
                 // IZQUIERDA
                 for(int i = 1; i <= 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX][locationY - i].getIcon() == null) {
-                            setup(locationX, locationY - i, "move");
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx][posy - i].getIcon() == null) {
+                            setup(posx, posy - i, "move");
                         } else {
                             break;
                         }
@@ -866,73 +883,73 @@ public class Chess extends JFrame {
             break;
 
             case "wPawn":
-                if(locationX == 6) { // CONDICIONAL PRIMERA JUGADA
+                if(posx == 6) { // CONDICIONAL PRIMERA JUGADA
                     // ARRIBA 1
-                    if(Chess.TILES[locationX - 1][locationY].getIcon() == null) {
-                        setup(locationX - 1, locationY, "move");
+                    if(Chess.TILES[posx - 1][posy].getIcon() == null) {
+                        setup(posx - 1, posy, "move");
                     }
                     
                     // ARRIBA 2
-                    if (Chess.TILES[locationX - 2][locationY].getIcon() == null) {
-                        setup(locationX - 2, locationY, "move");
+                    if (Chess.TILES[posx - 2][posy].getIcon() == null) {
+                        setup(posx - 2, posy, "move");
                     }
                 }
 
-                if(locationX < 6) { // CONDICIONAL SIGUIENTES JUGADAS
+                if(posx < 6) { // CONDICIONAL SIGUIENTES JUGADAS
                     // ARRIBA
-                    if(Chess.TILES[locationX - 1][locationY].getIcon() == null) {
-                        setup(locationX - 1, locationY, "move");
+                    if(Chess.TILES[posx - 1][posy].getIcon() == null) {
+                        setup(posx - 1, posy, "move");
                     }
                 }
             break;                
             
         // BLACK
             case "bKing":
-                if(locationX != 7) {
-                    if(Chess.TILES[locationX + 1][locationY].getIcon() == null) {
-                        setup(locationX + 1, locationY, "move");
+                if(posx != 7) {
+                    if(Chess.TILES[posx + 1][posy].getIcon() == null) {
+                        setup(posx + 1, posy, "move");
                     }                
                 }
 
-                if(locationX != 0) {
-                    if(Chess.TILES[locationX - 1][locationY].getIcon() == null) {
-                        setup(locationX - 1, locationY, "move");
+                if(posx != 0) {
+                    if(Chess.TILES[posx - 1][posy].getIcon() == null) {
+                        setup(posx - 1, posy, "move");
                     }                
                 }
 
-                if(locationY != 7) {
-                    if(Chess.TILES[locationX][locationY + 1].getIcon() == null) {                    
-                        setup(locationX, locationY + 1, "move");
+                if(posy != 7) {
+                    if(Chess.TILES[posx][posy + 1].getIcon() == null) {                    
+                        setup(posx, posy + 1, "move");
                     }                
                 }
 
-                if(locationY != 0) {
-                    if(Chess.TILES[locationX][locationY - 1].getIcon() == null) {
-                        setup(locationX, locationY - 1, "move");
+                if(posy != 0) {
+                    if(Chess.TILES[posx][posy - 1].getIcon() == null) {
+                        setup(posx, posy - 1, "move");
                     }                
                 }
 
-                if(locationX != 7 && locationY != 7) {
-                    if(Chess.TILES[locationX + 1][locationY + 1].getIcon() == null) {
-                        setup(locationX + 1, locationY + 1, "move");
+                if(posx != 7 && posy != 7) {
+                    if(Chess.TILES[posx + 1][posy + 1].getIcon() == null) {
+                        setup(posx + 1, posy + 1, "move");
                     }                
                 }
 
-                if(locationX != 7 && locationY != 0) {
-                    if(Chess.TILES[locationX + 1][locationY - 1].getIcon() == null) {
-                       setup(locationX + 1, locationY - 1, "move");
+                if(posx != 7 && posy != 0) {
+                    if(Chess.TILES[posx + 1][posy - 1].getIcon() == null) {
+                       setup(posx + 1, posy - 1, "move");
                     }               
                 }
 
-                if(locationX != 0 && locationY != 7) {
-                    if(Chess.TILES[locationX - 1][locationY + 1].getIcon() == null) {
-                        setup(locationX - 1, locationY + 1, "move");
+                if(posx != 0 && posy != 7) {
+                    if(Chess.TILES[posx - 1][posy + 1].getIcon() == null) {
+                        setup(posx - 1, posy + 1, "move");
                     }                
                 }
 
-                if(locationX != 0 && locationY != 0) {
-                    if(Chess.TILES[locationX - 1][locationY - 1].getIcon() == null) {
-                        setup(locationX - 1, locationY - 1, "move");
+                if(posx != 0 && posy != 0) {
+                    if(Chess.TILES[posx - 1][posy - 1].getIcon() == null) {
+                        setup(posx - 1, posy - 1, "move");
                     }                
                 }
             break;
@@ -940,10 +957,10 @@ public class Chess extends JFrame {
             case "bQueen":                
                 // BISHOP FUNC
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY + i].getIcon() == null) {
-                            setup(locationX + i, locationY + i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy + i].getIcon() == null) {
+                            setup(posx + i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -951,10 +968,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY - i].getIcon() == null) {
-                            setup(locationX - i, locationY - i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy - i].getIcon() == null) {
+                            setup(posx - i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -962,10 +979,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY - i].getIcon() == null) {
-                            setup(locationX + i, locationY - i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy - i].getIcon() == null) {
+                            setup(posx + i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -973,10 +990,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY + i].getIcon() == null) {
-                            setup(locationX - i, locationY + i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy + i].getIcon() == null) {
+                            setup(posx - i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -985,9 +1002,9 @@ public class Chess extends JFrame {
                 
                 // ROOK FUNC
                 for(int i = 1; i < 8; i++) {
-                    if( ( (locationX + i) >= 0 && (locationX + i) <= 7 ) ) {
-                        if(Chess.TILES[locationX + i][locationY].getIcon() == null) {
-                            setup(locationX + i, locationY, "move");
+                    if( ( (posx + i) >= 0 && (posx + i) <= 7 ) ) {
+                        if(Chess.TILES[posx + i][posy].getIcon() == null) {
+                            setup(posx + i, posy, "move");
                         } else {
                             break;
                         }
@@ -995,9 +1012,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY].getIcon() == null) {
-                            setup(locationX - i, locationY, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy].getIcon() == null) {
+                            setup(posx - i, posy, "move");
                         } else {
                             break;
                         }
@@ -1005,9 +1022,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ( (locationY + i) >= 0 && (locationY + i) <= 7 ) ) {
-                        if(Chess.TILES[locationX][locationY + i].getIcon() == null) {
-                            setup(locationX, locationY + i, "move");
+                    if( ( (posy + i) >= 0 && (posy + i) <= 7 ) ) {
+                        if(Chess.TILES[posx][posy + i].getIcon() == null) {
+                            setup(posx, posy + i, "move");
                         } else {
                             break;
                         }
@@ -1015,9 +1032,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX][locationY - i].getIcon() == null) {
-                            setup(locationX, locationY - i, "move");
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx][posy - i].getIcon() == null) {
+                            setup(posx, posy - i, "move");
                         } else {
                             break;
                         }
@@ -1027,10 +1044,10 @@ public class Chess extends JFrame {
 
             case "bBishop":
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY + i].getIcon() == null) {
-                            setup(locationX + i, locationY + i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy + i].getIcon() == null) {
+                            setup(posx + i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -1038,10 +1055,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY - i].getIcon() == null) {
-                            setup(locationX - i, locationY - i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy - i].getIcon() == null) {
+                            setup(posx - i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -1049,10 +1066,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX + i][locationY - i].getIcon() == null) {
-                            setup(locationX + i, locationY - i, "move");
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx + i][posy - i].getIcon() == null) {
+                            setup(posx + i, posy - i, "move");
                         } else {
                             break;
                         }
@@ -1060,10 +1077,10 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY + i].getIcon() == null) {
-                            setup(locationX - i, locationY + i, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy + i].getIcon() == null) {
+                            setup(posx - i, posy + i, "move");
                         } else {
                             break;
                         }
@@ -1072,68 +1089,68 @@ public class Chess extends JFrame {
             break;
 
             case "bKnight":
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7 )
-                        && ( (locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(Chess.TILES[locationX - 2][locationY + 1].getIcon() == null) {
-                        setup(locationX - 2, locationY + 1, "move");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7 )
+                        && ( (posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(Chess.TILES[posx - 2][posy + 1].getIcon() == null) {
+                        setup(posx - 2, posy + 1, "move");
                     }
                 }
                 
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7 )
-                        && ((locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(Chess.TILES[locationX - 2][locationY - 1].getIcon() == null) {
-                        setup(locationX - 2, locationY - 1, "move");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7 )
+                        && ((posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(Chess.TILES[posx - 2][posy - 1].getIcon() == null) {
+                        setup(posx - 2, posy - 1, "move");
                     }
                 }
                 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ( (locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(Chess.TILES[locationX + 2][locationY + 1].getIcon() == null) {
-                        setup(locationX + 2, locationY + 1, "move");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ( (posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(Chess.TILES[posx + 2][posy + 1].getIcon() == null) {
+                        setup(posx + 2, posy + 1, "move");
                     }
                 }
 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ( (locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(Chess.TILES[locationX + 2][locationY - 1].getIcon() == null) {
-                        setup(locationX + 2, locationY - 1, "move");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ( (posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(Chess.TILES[posx + 2][posy - 1].getIcon() == null) {
+                        setup(posx + 2, posy - 1, "move");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ((locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(Chess.TILES[locationX + 1][locationY + 2].getIcon() == null) {
-                        setup(locationX + 1, locationY + 2, "move");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ((posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(Chess.TILES[posx + 1][posy + 2].getIcon() == null) {
+                        setup(posx + 1, posy + 2, "move");
                     }
                 }
 
-                if( ( (locationX + 1) >= 0 && (locationX + 1) <= 7 )
-                        && ( (locationY - 2) >= 0 && (locationY - 2) <= 7 ) ) {
-                    if(Chess.TILES[locationX + 1][locationY - 2].getIcon() == null) {
-                        setup(locationX + 1, locationY - 2, "move");
+                if( ( (posx + 1) >= 0 && (posx + 1) <= 7 )
+                        && ( (posy - 2) >= 0 && (posy - 2) <= 7 ) ) {
+                    if(Chess.TILES[posx + 1][posy - 2].getIcon() == null) {
+                        setup(posx + 1, posy - 2, "move");
                     }
                 }
                 
-                if( ( (locationX - 1) >= 0 && (locationX - 1) <= 7 )
-                        && ( (locationY + 2) >= 0 && (locationY + 2) <= 7 ) ) {
-                    if(Chess.TILES[locationX - 1][locationY + 2].getIcon() == null) {
-                        setup(locationX - 1, locationY + 2, "move");
+                if( ( (posx - 1) >= 0 && (posx - 1) <= 7 )
+                        && ( (posy + 2) >= 0 && (posy + 2) <= 7 ) ) {
+                    if(Chess.TILES[posx - 1][posy + 2].getIcon() == null) {
+                        setup(posx - 1, posy + 2, "move");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(Chess.TILES[locationX - 1][locationY - 2].getIcon() == null) {                        
-                        setup(locationX - 1, locationY + 2, "move");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(Chess.TILES[posx - 1][posy - 2].getIcon() == null) {                        
+                        setup(posx - 1, posy + 2, "move");
                     }
                 }
             break;
 
             case "bRook":
                 for(int i = 1; i < 8; i++) {
-                    if( ( (locationX + i) >= 0 && (locationX + i) <= 7 ) ) {
-                        if(Chess.TILES[locationX + i][locationY].getIcon() == null) {
-                            setup(locationX + i, locationY, "move");
+                    if( ( (posx + i) >= 0 && (posx + i) <= 7 ) ) {
+                        if(Chess.TILES[posx + i][posy].getIcon() == null) {
+                            setup(posx + i, posy, "move");
                         } else {
                             break;
                         }
@@ -1141,9 +1158,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(Chess.TILES[locationX - i][locationY].getIcon() == null) {
-                            setup(locationX - i, locationY, "move");
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(Chess.TILES[posx - i][posy].getIcon() == null) {
+                            setup(posx - i, posy, "move");
                         } else {
                             break;
                         }
@@ -1151,9 +1168,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ( (locationY + i) >= 0 && (locationY + i) <= 7 ) ) {
-                        if(Chess.TILES[locationX][locationY + i].getIcon() == null) {
-                            setup(locationX, locationY + i, "move");
+                    if( ( (posy + i) >= 0 && (posy + i) <= 7 ) ) {
+                        if(Chess.TILES[posx][posy + i].getIcon() == null) {
+                            setup(posx, posy + i, "move");
                         } else {
                             break;
                         }
@@ -1161,9 +1178,9 @@ public class Chess extends JFrame {
                 }
                 
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(Chess.TILES[locationX][locationY - i].getIcon() == null) {
-                            setup(locationX, locationY - i, "move");
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(Chess.TILES[posx][posy - i].getIcon() == null) {
+                            setup(posx, posy - i, "move");
                         } else {
                             break;
                         }
@@ -1172,74 +1189,74 @@ public class Chess extends JFrame {
             break;
 
             case "bPawn":
-                if(locationX == 1) {                
-                    if(Chess.TILES[locationX + 1][locationY].getIcon() == null) {
-                        setup(locationX + 1, locationY, "move");
+                if(posx == 1) {                
+                    if(Chess.TILES[posx + 1][posy].getIcon() == null) {
+                        setup(posx + 1, posy, "move");
                     }
 
-                    if (Chess.TILES[locationX + 2][locationY].getIcon() == null) {
-                        setup(locationX + 2, locationY, "move");
+                    if (Chess.TILES[posx + 2][posy].getIcon() == null) {
+                        setup(posx + 2, posy, "move");
                     }
                 }
 
-                if(locationX > 1) {
-                    if(Chess.TILES[locationX + 1][locationY].getIcon() == null) {
-                        setup(locationX + 1, locationY, "move");
+                if(posx > 1) {
+                    if(Chess.TILES[posx + 1][posy].getIcon() == null) {
+                        setup(posx + 1, posy, "move");
                     }
                 }
             break;
-        }                                
+        }
     }
     
-    private void setKillingTiles(String tile) {        
+    private void getKillingTiles(String tile, int posx, int posy) {        
         switch(tile) {
         // WHITE
             case "wKing":
-                if(locationX != 7) {
-                    if (isBlack(locationX + 1, locationY)) {
-                        setup(locationX + 1, locationY, "kill");
+                if(posx != 7) {
+                    if (isBlack(posx + 1, posy)) {
+                        setup(posx + 1, posy, "kill");
                     }
                 }
 
-                if(locationX != 0) {               
-                    if (isBlack(locationX - 1, locationY)) {
-                        setup(locationX - 1, locationY, "kill");
+                if(posx != 0) {               
+                    if (isBlack(posx - 1, posy)) {
+                        setup(posx - 1, posy, "kill");
                     }
                 }
 
-                if(locationY != 7) {                
-                    if (isBlack(locationX, locationY + 1)) {
-                        setup(locationX, locationY + 1, "kill");
+                if(posy != 7) {                
+                    if (isBlack(posx, posy + 1)) {
+                        setup(posx, posy + 1, "kill");
                     }
                 }
 
-                if(locationY != 0) {                
-                    if (isBlack(locationX, locationY - 1)) {
-                        setup(locationX, locationY - 1, "kill");
+                if(posy != 0) {                
+                    if (isBlack(posx, posy - 1)) {
+                        setup(posx, posy - 1, "kill");
                     }
                 }
 
-                if(locationX != 7 && locationY != 7) {                
-                    if (isBlack(locationX + 1, locationY + 1)) {
-                        setup(locationX + 1, locationY + 1, "kill");
+                if(posx != 7 && posy != 7) {                
+                    if (isBlack(posx + 1, posy + 1)) {
+                        setup(posx + 1, posy + 1, "kill");
                     }
                 }
 
-                if(locationX != 7 && locationY != 0) {                
-                    if (isBlack(locationX + 1, locationY - 1)) {
-                        setup(locationX + 1, locationY - 1, "kill");
+                if(posx != 7 && posy != 0) {                
+                    if (isBlack(posx + 1, posy - 1)) {
+                        setup(posx + 1, posy - 1, "kill");
                     }
                 }
 
-                if(locationX != 0 && locationY != 7) {                
-                    if (isBlack(locationX - 1, locationY + 1)) {
-                        setup(locationX - 1, locationY + 1, "kill");
+                if(posx != 0 && posy != 7) {                
+                    if (isBlack(posx - 1, posy + 1)) {
+                        setup(posx - 1, posy + 1, "kill");
                     }
                 }
 
-                if(locationX != 0 && locationY != 0) {                
-                    if (isBlack(locationX - 1, locationY - 1)) {
-                        setup(locationX - 1, locationY - 1, "kill");
+                if(posx != 0 && posy != 0) {                
+                    if (isBlack(posx - 1, posy - 1)) {
+                        setup(posx - 1, posy - 1, "kill");
                     }
                 }
             break;
@@ -1249,12 +1266,12 @@ public class Chess extends JFrame {
             // BISHOP FUNC
                 // ARRIBA DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isWhite(locationX + i, locationY + i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isWhite(posx + i, posy + i)) {
                             break;
-                        } else if(isBlack(locationX + i, locationY + i)) {
-                            setup(locationX + i, locationY + i, "kill");
+                        } else if(isBlack(posx + i, posy + i)) {
+                            setup(posx + i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1262,12 +1279,12 @@ public class Chess extends JFrame {
                 
                 // ABAJO IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isWhite(locationX - i, locationY - i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isWhite(posx - i, posy - i)) {
                             break;
-                        } else if(isBlack(locationX - i, locationY - i)) {
-                            setup(locationX - i, locationY - i, "kill");
+                        } else if(isBlack(posx - i, posy - i)) {
+                            setup(posx - i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1275,12 +1292,12 @@ public class Chess extends JFrame {
                 
                 // ARRIBA IZQUIERDA                
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isWhite(locationX + i, locationY - i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isWhite(posx + i, posy - i)) {
                             break;
-                        } else if(isBlack(locationX + i, locationY - i)) {
-                            setup(locationX + i, locationY - i, "kill");
+                        } else if(isBlack(posx + i, posy - i)) {
+                            setup(posx + i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1288,12 +1305,12 @@ public class Chess extends JFrame {
                 
                 // ABAJO DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isWhite(locationX - i, locationY + i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isWhite(posx - i, posy + i)) {
                             break;
-                        } else if(isBlack(locationX - i, locationY + i)) {
-                            setup(locationX - i, locationY + i, "kill");
+                        } else if(isBlack(posx - i, posy + i)) {
+                            setup(posx - i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1302,11 +1319,11 @@ public class Chess extends JFrame {
             // ROOK FUNC
                 // ABAJO
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7) ) {
-                        if(isWhite(locationX + i, locationY)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7) ) {
+                        if(isWhite(posx + i, posy)) {
                             break;
-                        } else if(isBlack(locationX + i, locationY)) {
-                            setup(locationX + i, locationY, "kill");
+                        } else if(isBlack(posx + i, posy)) {
+                            setup(posx + i, posy, "kill");
                             break;
                         }
                     }
@@ -1314,11 +1331,11 @@ public class Chess extends JFrame {
                 
                 // ARRIBA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(isWhite(locationX - i, locationY)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(isWhite(posx - i, posy)) {
                             break;
-                        } else if(isBlack(locationX - i, locationY)) {
-                            setup(locationX - i, locationY, "kill");
+                        } else if(isBlack(posx - i, posy)) {
+                            setup(posx - i, posy, "kill");
                             break;
                         }
                     }
@@ -1326,11 +1343,11 @@ public class Chess extends JFrame {
                 
                 // DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isWhite(locationX, locationY + i)) {
+                    if( ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isWhite(posx, posy + i)) {
                             break;
-                        } else if(isBlack(locationX, locationY + i)) {
-                            setup(locationX, locationY + i, "kill");
+                        } else if(isBlack(posx, posy + i)) {
+                            setup(posx, posy + i, "kill");
                             break;
                         }
                     }
@@ -1338,11 +1355,11 @@ public class Chess extends JFrame {
                 
                 // IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isWhite(locationX, locationY - i)) {
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isWhite(posx, posy - i)) {
                             break;
-                        } else if(isBlack(locationX, locationY - i)) {
-                            setup(locationX, locationY - i, "kill");
+                        } else if(isBlack(posx, posy - i)) {
+                            setup(posx, posy - i, "kill");
                             break;
                         }
                     }
@@ -1352,12 +1369,12 @@ public class Chess extends JFrame {
             case "wBishop":
                 // ARRIBA DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isWhite(locationX + i, locationY + i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isWhite(posx + i, posy + i)) {
                             break;
-                        } else if(isBlack(locationX + i, locationY + i)) {
-                            setup(locationX + i, locationY + i, "kill");
+                        } else if(isBlack(posx + i, posy + i)) {
+                            setup(posx + i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1365,12 +1382,12 @@ public class Chess extends JFrame {
                 
                 // ABAJO IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isWhite(locationX - i, locationY - i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isWhite(posx - i, posy - i)) {
                             break;
-                        } else if(isBlack(locationX - i, locationY - i)) {
-                            setup(locationX - i, locationY - i, "kill");
+                        } else if(isBlack(posx - i, posy - i)) {
+                            setup(posx - i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1378,12 +1395,12 @@ public class Chess extends JFrame {
                 
                 // ARRIBA IZQUIERDA                
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isWhite(locationX + i, locationY - i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isWhite(posx + i, posy - i)) {
                             break;
-                        } else if(isBlack(locationX + i, locationY - i)) {
-                            setup(locationX + i, locationY - i, "kill");
+                        } else if(isBlack(posx + i, posy - i)) {
+                            setup(posx + i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1391,12 +1408,12 @@ public class Chess extends JFrame {
                 
                 // ABAJO DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isWhite(locationX - i, locationY + i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isWhite(posx - i, posy + i)) {
                             break;
-                        } else if(isBlack(locationX - i, locationY + i)) {
-                            setup(locationX - i, locationY + i, "kill");
+                        } else if(isBlack(posx - i, posy + i)) {
+                            setup(posx - i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1404,59 +1421,59 @@ public class Chess extends JFrame {
             break;
 
             case "wKnight":
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7)
-                        && ( (locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(isBlack(locationX - 2, locationY + 1)) {
-                        setup(locationX - 2, locationY + 1, "kill");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7)
+                        && ( (posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(isBlack(posx - 2, posy + 1)) {
+                        setup(posx - 2, posy + 1, "kill");
                     }
                 }
                 
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7)
-                        && ( (locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(isBlack(locationX - 2, locationY - 1)) {
-                        setup(locationX - 2, locationY - 1, "kill");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7)
+                        && ( (posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(isBlack(posx - 2, posy - 1)) {
+                        setup(posx - 2, posy - 1, "kill");
                     }
                 }
                 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ((locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(isBlack(locationX + 2, locationY + 1)) {
-                        setup(locationX + 2, locationY + 1, "kill");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ((posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(isBlack(posx + 2, posy + 1)) {
+                        setup(posx + 2, posy + 1, "kill");
                     }
                 }
 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ((locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(isBlack(locationX + 2, locationY - 1)) {
-                        setup(locationX + 2, locationY - 1, "kill");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ((posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(isBlack(posx + 2, posy - 1)) {
+                        setup(posx + 2, posy - 1, "kill");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ((locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(isBlack(locationX + 1, locationY + 2)) {
-                        setup(locationX + 2, locationY + 2, "kill");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ((posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(isBlack(posx + 1, posy + 2)) {
+                        setup(posx + 2, posy + 2, "kill");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(isBlack(locationX + 1, locationY - 2)) {
-                        setup(locationX + 1, locationY - 2, "kill");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(isBlack(posx + 1, posy - 2)) {
+                        setup(posx + 1, posy - 2, "kill");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(isBlack(locationX - 1, locationY + 2)) {
-                        setup(locationX - 1, locationY + 2, "kill");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(isBlack(posx - 1, posy + 2)) {
+                        setup(posx - 1, posy + 2, "kill");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(isBlack(locationX - 1, locationY - 2)) {                        
-                        setup(locationX - 1, locationY - 2, "kill");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(isBlack(posx - 1, posy - 2)) {                        
+                        setup(posx - 1, posy - 2, "kill");
                     }
                 }
             break;
@@ -1464,11 +1481,11 @@ public class Chess extends JFrame {
             case "wRook":
                 // ABAJO
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7) ) {
-                        if(isWhite(locationX + i, locationY)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7) ) {
+                        if(isWhite(posx + i, posy)) {
                             break;
-                        } else if(isBlack(locationX + i, locationY)) {
-                            setup(locationX + i, locationY, "kill");
+                        } else if(isBlack(posx + i, posy)) {
+                            setup(posx + i, posy, "kill");
                             break;
                         }
                     }
@@ -1476,11 +1493,11 @@ public class Chess extends JFrame {
                 
                 // ARRIBA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(isWhite(locationX - i, locationY)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(isWhite(posx - i, posy)) {
                             break;
-                        } else if(isBlack(locationX - i, locationY)) {
-                            setup(locationX - i, locationY, "kill");
+                        } else if(isBlack(posx - i, posy)) {
+                            setup(posx - i, posy, "kill");
                             break;
                         }
                     }
@@ -1488,11 +1505,11 @@ public class Chess extends JFrame {
                 
                 // DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isWhite(locationX, locationY + i)) {
+                    if( ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isWhite(posx, posy + i)) {
                             break;
-                        } else if(isBlack(locationX, locationY + i)) {
-                            setup(locationX, locationY + i, "kill");
+                        } else if(isBlack(posx, posy + i)) {
+                            setup(posx, posy + i, "kill");
                             break;
                         }
                     }
@@ -1500,11 +1517,11 @@ public class Chess extends JFrame {
                 
                 // IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isWhite(locationX, locationY - i)) {
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isWhite(posx, posy - i)) {
                             break;
-                        } else if(isBlack(locationX, locationY - i)) {
-                            setup(locationX, locationY - i, "kill");
+                        } else if(isBlack(posx, posy - i)) {
+                            setup(posx, posy - i, "kill");
                             break;
                         }
                     }
@@ -1513,16 +1530,16 @@ public class Chess extends JFrame {
 
             case "wPawn":
                 // ATAQUE EN DIAGONAL SUPERIOR DERECHA
-                if(locationY < 7) {
-                    if (isBlack(locationX - 1, locationY + 1)) {
-                        setup(locationX - 1, locationY + 1, "kill");
+                if(posy < 7) {
+                    if (isBlack(posx - 1, posy + 1)) {
+                        setup(posx - 1, posy + 1, "kill");
                     }
                 }
                 
                 // ATAQUE EN DIAGONAL SUPERIOR IZQUIERDA
-                if(locationY > 1) {
-                    if (isBlack(locationX - 1, locationY - 1)) {
-                        setup(locationX - 1, locationY - 1, "kill");
+                if(posy > 1) {
+                    if (isBlack(posx - 1, posy - 1)) {
+                        setup(posx - 1, posy - 1, "kill");
                     }
                 }
             break;
@@ -1530,51 +1547,59 @@ public class Chess extends JFrame {
                 
         // BLACK
             case "bKing":
-                if(locationX != 7) {                        
-                    if (isWhite(locationX + 1, locationY)) {
-                        setup(locationX + 1, locationY, "kill");
+                // ABAJO
+                if(posx != 7) {                        
+                    if (isWhite(posx + 1, posy)) {
+                        setup(posx + 1, posy, "kill");
+                    }
+                }
+                
+                // ARRIBA
+                if(posx != 0) {                        
+                    if (isWhite(posx - 1, posy)) {
+                        setup(posx - 1, posy, "kill");
+                    }
+                }
+                
+                // DERECHA
+                if(posy != 7) {                        
+                    if (isWhite(posx, posy + 1)) {
+                        setup(posx, posy + 1, "kill");
                     }
                 }
 
-                if(locationX != 0) {                        
-                    if (isWhite(locationX - 1, locationY)) {
-                        setup(locationX - 1, locationY, "kill");
+                // IZQUIERDA
+                if(posy != 0) {                        
+                    if (isWhite(posx, posy - 1)) {
+                        setup(posx, posy - 1, "kill");
                     }
                 }
 
-                if(locationY != 7) {                        
-                    if (isWhite(locationX, locationY + 1)) {
-                        setup(locationX, locationY + 1, "kill");
+                // ABAJO DERECHA
+                if(posx != 7 && posy != 7) {                        
+                    if (isWhite(posx + 1, posy + 1)) {
+                        setup(posx + 1, posy + 1, "kill");
                     }
                 }
 
-                if(locationY != 0) {                        
-                    if (isWhite(locationX, locationY - 1)) {
-                        setup(locationX, locationY - 1, "kill");
+                // ABAJO IZQUIERDA
+                if(posx != 7 && posy != 0) {                        
+                    if (isWhite(posx + 1, posy - 1)) {
+                        setup(posx + 1, posy - 1, "kill");
+                    }
+                }
+                
+                // ARRIBA DERECHA
+                if(posx != 0 && posy != 7) {                        
+                    if (isWhite(posx - 1, posy + 1)) {
+                        setup(posx - 1, posy + 1, "kill");
                     }
                 }
 
-                if(locationX != 7 && locationY != 7) {                        
-                    if (isWhite(locationX + 1, locationY + 1)) {
-                        setup(locationX + 1, locationY + 1, "kill");
-                    }
-                }
-
-                if(locationX != 7 && locationY != 0) {                        
-                    if (isWhite(locationX + 1, locationY - 1)) {
-                        setup(locationX + 1, locationY - 1, "kill");
-                    }
-                }
-
-                if(locationX != 0 && locationY != 7) {                        
-                    if (isWhite(locationX - 1, locationY + 1)) {
-                        setup(locationX - 1, locationY + 1, "kill");
-                    }
-                }
-
-                if(locationX != 0 && locationY != 0) {                        
-                    if (isWhite(locationX - 1, locationY - 1)) {
-                        setup(locationX - 1, locationY - 1, "kill");
+                // ARRIBA IZQUIERDA
+                if(posx != 0 && posy != 0) {                        
+                    if (isWhite(posx - 1, posy - 1)) {
+                        setup(posx - 1, posy - 1, "kill");
                     }
                 }
             break;
@@ -1583,12 +1608,12 @@ public class Chess extends JFrame {
             // BISHOP FUNC
                 // ABAJO DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isBlack(locationX + i, locationY + i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isBlack(posx + i, posy + i)) {
                             break;
-                        } else if(isWhite(locationX + i, locationY + i)) {
-                            setup(locationX + i, locationY + i, "kill");
+                        } else if(isWhite(posx + i, posy + i)) {
+                            setup(posx + i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1596,12 +1621,12 @@ public class Chess extends JFrame {
                 
                 // ARRIBA IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isBlack(locationX - i, locationY - i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isBlack(posx - i, posy - i)) {
                             break;
-                        } else if(isWhite(locationX - i, locationY - i)) {
-                            setup(locationX - i, locationY - i, "kill");
+                        } else if(isWhite(posx - i, posy - i)) {
+                            setup(posx - i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1609,12 +1634,12 @@ public class Chess extends JFrame {
                 
                 // ABAJO IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isBlack(locationX + i, locationY - i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isBlack(posx + i, posy - i)) {
                             break;
-                        } else if(isWhite(locationX + i, locationY - i)) {
-                            setup(locationX + i, locationY - i, "kill");
+                        } else if(isWhite(posx + i, posy - i)) {
+                            setup(posx + i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1622,12 +1647,12 @@ public class Chess extends JFrame {
                 
                 // ARRIBA DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isBlack(locationX - i, locationY + i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isBlack(posx - i, posy + i)) {
                             break;
-                        } else if(isWhite(locationX - i, locationY + i)) {
-                            setup(locationX - i, locationY + i, "kill");
+                        } else if(isWhite(posx - i, posy + i)) {
+                            setup(posx - i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1636,11 +1661,11 @@ public class Chess extends JFrame {
             // ROOK FUNC
                 // ABAJO
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7) ) {
-                        if(isBlack(locationX + i, locationY)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7) ) {
+                        if(isBlack(posx + i, posy)) {
                             break;
-                        } else if(isWhite(locationX + i, locationY)) {
-                            setup(locationX + i, locationY, "kill");
+                        } else if(isWhite(posx + i, posy)) {
+                            setup(posx + i, posy, "kill");
                             break;
                         }
                     }
@@ -1648,11 +1673,11 @@ public class Chess extends JFrame {
                 
                 // ARRIBA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(isBlack(locationX - i, locationY)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(isBlack(posx - i, posy)) {
                             break;
-                        } else if(isWhite(locationX - i, locationY)) {
-                            setup(locationX - i, locationY, "kill");
+                        } else if(isWhite(posx - i, posy)) {
+                            setup(posx - i, posy, "kill");
                             break;
                         }
                     }
@@ -1660,11 +1685,11 @@ public class Chess extends JFrame {
                 
                 // DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isBlack(locationX, locationY + i)) {
+                    if( ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isBlack(posx, posy + i)) {
                             break;
-                        } else if(isWhite(locationX, locationY + i)) {
-                            setup(locationX, locationY + i, "kill");
+                        } else if(isWhite(posx, posy + i)) {
+                            setup(posx, posy + i, "kill");
                             break;
                         }
                     }
@@ -1672,11 +1697,11 @@ public class Chess extends JFrame {
                 
                 // IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isBlack(locationX, locationY - i)) {
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isBlack(posx, posy - i)) {
                             break;
-                        } else if(isWhite(locationX, locationY - i)) {
-                            setup(locationX, locationY - i, "kill");
+                        } else if(isWhite(posx, posy - i)) {
+                            setup(posx, posy - i, "kill");
                             break;
                         }
                     }
@@ -1686,12 +1711,12 @@ public class Chess extends JFrame {
             case "bBishop":
                 // ABAJO DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isBlack(locationX + i, locationY + i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isBlack(posx + i, posy + i)) {
                             break;
-                        } else if(isWhite(locationX + i, locationY + i)) {
-                            setup(locationX + i, locationY + i, "kill");
+                        } else if(isWhite(posx + i, posy + i)) {
+                            setup(posx + i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1699,12 +1724,12 @@ public class Chess extends JFrame {
                 
                 // ARRIBA IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isBlack(locationX - i, locationY - i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isBlack(posx - i, posy - i)) {
                             break;
-                        } else if(isWhite(locationX - i, locationY - i)) {
-                            setup(locationX - i, locationY - i, "kill");
+                        } else if(isWhite(posx - i, posy - i)) {
+                            setup(posx - i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1712,12 +1737,12 @@ public class Chess extends JFrame {
                 
                 // ABAJO IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7)
-                            && ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isBlack(locationX + i, locationY - i)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7)
+                            && ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isBlack(posx + i, posy - i)) {
                             break;
-                        } else if(isWhite(locationX + i, locationY - i)) {
-                            setup(locationX + i, locationY - i, "kill");
+                        } else if(isWhite(posx + i, posy - i)) {
+                            setup(posx + i, posy - i, "kill");
                             break;
                         }
                     }                    
@@ -1725,12 +1750,12 @@ public class Chess extends JFrame {
                 
                 // ARRIBA DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7)
-                            && ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isBlack(locationX - i, locationY + i)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7)
+                            && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isBlack(posx - i, posy + i)) {
                             break;
-                        } else if(isWhite(locationX - i, locationY + i)) {
-                            setup(locationX - i, locationY + i, "kill");
+                        } else if(isWhite(posx - i, posy + i)) {
+                            setup(posx - i, posy + i, "kill");
                             break;
                         }
                     }                    
@@ -1738,59 +1763,60 @@ public class Chess extends JFrame {
             break;
 
             case "bKnight":
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7)
-                        && ( (locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(isWhite(locationX - 2, locationY + 1)) {
-                        setup(locationX - 2, locationY + 1, "kill");
+                // ARRIBA ABAJO DERECHA
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7)
+                        && ( (posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(isWhite(posx - 2, posy + 1)) {
+                        setup(posx - 2, posy + 1, "kill");
                     }
                 }
                 
-                if( ((locationX - 2) >= 0 && (locationX - 2) <= 7)
-                        && ( (locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(isWhite(locationX - 2, locationY - 1)) {
-                        setup(locationX - 2, locationY - 1, "kill");
+                if( ((posx - 2) >= 0 && (posx - 2) <= 7)
+                        && ( (posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(isWhite(posx - 2, posy - 1)) {
+                        setup(posx - 2, posy - 1, "kill");
                     }
                 }
                 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ( (locationY + 1) >= 0 && (locationY + 1) <= 7) ) {
-                    if(isWhite(locationX + 2, locationY + 1)) {
-                        setup(locationX + 2, locationY + 1, "kill");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ( (posy + 1) >= 0 && (posy + 1) <= 7) ) {
+                    if(isWhite(posx + 2, posy + 1)) {
+                        setup(posx + 2, posy + 1, "kill");
                     }
                 }
 
-                if( ((locationX + 2) >= 0 && (locationX + 2) <= 7)
-                        && ( (locationY - 1) >= 0 && (locationY - 1) <= 7) ) {
-                    if(isWhite(locationX + 2, locationY - 1)) {
-                        setup(locationX + 2, locationY - 1, "kill");
+                if( ((posx + 2) >= 0 && (posx + 2) <= 7)
+                        && ( (posy - 1) >= 0 && (posy - 1) <= 7) ) {
+                    if(isWhite(posx + 2, posy - 1)) {
+                        setup(posx + 2, posy - 1, "kill");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ( (locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(isWhite(locationX + 1, locationY + 2)) {
-                        setup(locationX + 1, locationY + 2, "kill");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ( (posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(isWhite(posx + 1, posy + 2)) {
+                        setup(posx + 1, posy + 2, "kill");
                     }
                 }
 
-                if( ((locationX + 1) >= 0 && (locationX + 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(isWhite(locationX + 1, locationY - 2)) {
-                        setup(locationX + 1, locationY - 2, "kill");
+                if( ((posx + 1) >= 0 && (posx + 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(isWhite(posx + 1, posy - 2)) {
+                        setup(posx + 1, posy - 2, "kill");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY + 2) >= 0 && (locationY + 2) <= 7) ) {
-                    if(isWhite(locationX - 1, locationY + 2)) {
-                        setup(locationX - 1, locationY + 2, "kill");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy + 2) >= 0 && (posy + 2) <= 7) ) {
+                    if(isWhite(posx - 1, posy + 2)) {
+                        setup(posx - 1, posy + 2, "kill");
                     }
                 }
                 
-                if( ((locationX - 1) >= 0 && (locationX - 1) <= 7)
-                        && ((locationY - 2) >= 0 && (locationY - 2) <= 7) ) {
-                    if(isWhite(locationX - 1, locationY - 2)) {                        
-                        setup(locationX - 1, locationY - 2, "kill");
+                if( ((posx - 1) >= 0 && (posx - 1) <= 7)
+                        && ((posy - 2) >= 0 && (posy - 2) <= 7) ) {
+                    if(isWhite(posx - 1, posy - 2)) {                        
+                        setup(posx - 1, posy - 2, "kill");
                     }
                 }
             break;
@@ -1798,11 +1824,11 @@ public class Chess extends JFrame {
             case "bRook":
                 // ABAJO
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX + i) >= 0 && (locationX + i) <= 7) ) {
-                        if(isBlack(locationX + i, locationY)) {
+                    if( ((posx + i) >= 0 && (posx + i) <= 7) ) {
+                        if(isBlack(posx + i, posy)) {
                             break;
-                        } else if(isWhite(locationX + i, locationY)) {
-                            setup(locationX + i, locationY, "kill");
+                        } else if(isWhite(posx + i, posy)) {
+                            setup(posx + i, posy, "kill");
                             break;
                         }
                     }
@@ -1810,11 +1836,11 @@ public class Chess extends JFrame {
                 
                 // ARRIBA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationX - i) >= 0 && (locationX - i) <= 7) ) {
-                        if(isBlack(locationX - i, locationY)) {
+                    if( ((posx - i) >= 0 && (posx - i) <= 7) ) {
+                        if(isBlack(posx - i, posy)) {
                             break;
-                        } else if(isWhite(locationX - i, locationY)) {
-                            setup(locationX - i, locationY, "kill");
+                        } else if(isWhite(posx - i, posy)) {
+                            setup(posx - i, posy, "kill");
                             break;
                         }
                     }
@@ -1822,11 +1848,11 @@ public class Chess extends JFrame {
                 
                 // DERECHA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY + i) >= 0 && (locationY + i) <= 7) ) {
-                        if(isBlack(locationX, locationY + i)) {
+                    if( ((posy + i) >= 0 && (posy + i) <= 7) ) {
+                        if(isBlack(posx, posy + i)) {
                             break;
-                        } else if(isWhite(locationX, locationY + i)) {
-                            setup(locationX, locationY + i, "kill");
+                        } else if(isWhite(posx, posy + i)) {
+                            setup(posx, posy + i, "kill");
                             break;
                         }
                     }
@@ -1834,11 +1860,11 @@ public class Chess extends JFrame {
                 
                 // IZQUIERDA
                 for(int i = 1; i < 8; i++) {
-                    if( ((locationY - i) >= 0 && (locationY - i) <= 7) ) {
-                        if(isBlack(locationX, locationY - i)) {
+                    if( ((posy - i) >= 0 && (posy - i) <= 7) ) {
+                        if(isBlack(posx, posy - i)) {
                             break;
-                        } else if(isWhite(locationX, locationY - i)) {
-                            setup(locationX, locationY - i, "kill");
+                        } else if(isWhite(posx, posy - i)) {
+                            setup(posx, posy - i, "kill");
                             break;
                         }
                     }
@@ -1847,20 +1873,50 @@ public class Chess extends JFrame {
 
             case "bPawn":
                 // ATAQUE DIAGONAL SUPERIOR DERECHA
-                if(locationY <= 6) {
-                    if(isWhite(locationX + 1, locationY + 1)) {
-                        setup(locationX + 1, locationY + 1, "kill");
+                if(posy <= 6) {
+                    if(isWhite(posx + 1, posy + 1)) {
+                        setup(posx + 1, posy + 1, "kill");
                     }
                 }
 
                 // ATAQUE DIAGONAL SUPERIOR IZQUIERDA
-                if(locationY >= 1) {
-                    if(isWhite(locationX + 1, locationY - 1)) {
-                        setup(locationX + 1, locationY - 1, "kill");
+                if(posy >= 1) {
+                    if(isWhite(posx + 1, posy - 1)) {
+                        setup(posx + 1, posy - 1, "kill");
                     }
                 }                    
             break;
-        }                                              
+        }
+    }
+    
+    private String getTile(int posx, int posy) {
+        String tile = null;
+        if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwKing) {
+            tile = "wKing";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwQueen) {
+            tile = "wQueen";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwBishop) {
+            tile = "wBishop";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwKnight) {
+            tile = "wKnight";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwRook) {
+            tile = "wRook";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwPawn) {
+            tile = "wPawn";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbKing) {
+            tile = "bKing";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbQueen) {
+            tile = "bQueen";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbBishop) {
+            tile = "bBishop";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbKnight) {
+            tile = "bKnight";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbRook) {
+            tile = "bRook";
+        } else if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbPawn) {
+            tile = "bPawn";
+        }
+        return tile;
     }
     
     private void moveTile(JButton tile, JButton newtile) {
@@ -1870,13 +1926,13 @@ public class Chess extends JFrame {
     }        
     
     private void setup(int posx, int posy, String action) {
-        Chess.TILES[posx][posy].setEnabled(true);        
+        Chess.TILES[posx][posy].setEnabled(true);
         switch(action) {
             case "move":
-                Chess.TILES[posx][posy].setBackground(Color.YELLOW);
+                movingTiles[posx][posy] = true;
                 break;
             case "kill":
-                Chess.TILES[posx][posy].setBackground(Color.RED);
+                killingTiles[posx][posy] = true;
                 break;
         }
     }
