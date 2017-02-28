@@ -6,12 +6,10 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- *
+ * @desc Ajedrez en java
  * @author pepe
  */
 public class Chess extends JFrame {
-    
-    public static final JButton[][] TILES = new JButton[8][8];
     
     public static final ImageIcon ICONbKing 
         = new ImageIcon(Assets.chssICON_bKING);
@@ -24,8 +22,7 @@ public class Chess extends JFrame {
     public static final ImageIcon ICONbRook 
         = new ImageIcon(Assets.chssICON_bROOK);
     public static final ImageIcon ICONbPawn 
-        = new ImageIcon(Assets.chssICON_bPAWN);
-    
+        = new ImageIcon(Assets.chssICON_bPAWN);    
     public static final ImageIcon ICONwKing 
         = new ImageIcon(Assets.chssICON_wKING);
     public static final ImageIcon ICONwQueen 
@@ -37,8 +34,8 @@ public class Chess extends JFrame {
     public static final ImageIcon ICONwRook 
         = new ImageIcon(Assets.chssICON_wROOK);
     public static final ImageIcon ICONwPawn 
-        = new ImageIcon(Assets.chssICON_wPAWN);
-    
+        = new ImageIcon(Assets.chssICON_wPAWN);    
+    public static final JButton[][] TILES = new JButton[8][8];    
     private int locationX, locationY;
     private int newlocationX, newlocationY;
     private boolean pressed;
@@ -62,7 +59,7 @@ public class Chess extends JFrame {
         setTitle("Chess");
         setSize(800, 800);
         setResizable(false);
-        setLocationRelativeTo(null);
+        centerWindow();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         panelGame.setLayout(new GridLayout(8, 8));
@@ -79,6 +76,14 @@ public class Chess extends JFrame {
         add(panelGame);
     }
     
+    private void centerWindow() {
+        Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = defaultToolkit.getScreenSize();
+        this.setLocation(
+            (int)((screenSize.getWidth() / 2) - (this.getWidth() / 2)),
+            (int)((screenSize.getHeight() / 2) - (this.getHeight() / 2)));
+    }
+    
     private void initBar() {
         bar = new JMenuBar();
         menuGame = new JMenu("Game");
@@ -92,7 +97,7 @@ public class Chess extends JFrame {
         itemStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                setWhiteTrue();
+                setWhite(true);
             }
         });
     }
@@ -102,7 +107,7 @@ public class Chess extends JFrame {
         public void actionPerformed(ActionEvent evt) {
             if(!pressed) {
                 getPos(evt);
-                setAllNull();
+                setAllFalse();
                 Chess.TILES[locationX][locationY].setEnabled(true);
                 setMovingTiles();
                 setKillingTiles();
@@ -114,18 +119,18 @@ public class Chess extends JFrame {
                     clean();
                     setNullTileFalse();
                     if(playerW) {
-                        setWhiteTrue();
-                        setBlackFalse();
+                        setWhite(true);
+                        setBlack(false);
                     } else if(playerB) {
-                        setBlackTrue();
-                        setWhiteFalse();
+                        setBlack(true);
+                        setWhite(false);
                     }
                     pressed = false;
                 } else {
                     moveTile(Chess.TILES[locationX][locationY], Chess.TILES[newlocationX][newlocationY]);
                     clean();
                     setNullTileFalse();
-                    setAllNull();
+                    setAllFalse();
                     turns();
                     pressed = false;
                 }
@@ -135,7 +140,7 @@ public class Chess extends JFrame {
     
     private void initBoard() {
         setStartPos();
-        setAllNull();
+        setAllFalse();
     }
     
     private void setTileTip(int dim, int elemnt) {
@@ -368,15 +373,15 @@ public class Chess extends JFrame {
     }
     
     private void getPos(ActionEvent evt) {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(Chess.TILES[i][j] == evt.getSource()) {
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(Chess.TILES[x][y] == evt.getSource()) {
                     if (!pressed) {
-                        this.locationX = i;
-                        this.locationY = j;
+                        locationX = x;
+                        locationY = y;
                     } else {
-                        this.newlocationX = i;
-                        this.newlocationY = j;
+                        newlocationX = x;
+                        newlocationY = y;
                     }
                     break;
                 }
@@ -384,47 +389,76 @@ public class Chess extends JFrame {
         }
     }
     
+    private int getTilePos(String axis, String tile) {
+        int pos = 0;
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(getTile(x, y).equals(tile)) {
+                    switch(axis) {
+                        case "x":
+                            pos = x;
+                            break;
+                            
+                        case "y":
+                            pos = y;
+                            break;                        
+                    }                    
+                }
+            }
+        }
+        return pos;
+    }
+    
     private boolean isWhite(int posx, int posy) {
-        if (Chess.TILES[posx][posy].getIcon() == Chess.ICONwBishop
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONwKing
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONwKnight
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONwPawn
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONwQueen
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONwRook) {
+        if(Chess.TILES[posx][posy].getIcon() == Chess.ICONwBishop
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONwKing
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONwKnight
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONwPawn
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONwQueen
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONwRook) {
             return true;
-         } else {
+        } else {
             return false;
         }
     }
     
     private boolean isBlack(int posx, int posy) {        
-        if (Chess.TILES[posx][posy].getIcon() == Chess.ICONbBishop
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONbKing
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONbKnight
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONbPawn
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONbQueen
-         || Chess.TILES[posx][posy].getIcon() == Chess.ICONbRook) {
+        if(Chess.TILES[posx][posy].getIcon() == Chess.ICONbBishop
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONbKing
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONbKnight
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONbPawn
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONbQueen
+        || Chess.TILES[posx][posy].getIcon() == Chess.ICONbRook) {
             return true;
         } else {
             return false;
         }        
     }
     
-    private boolean canKingMoveTo(String player, int posx, int posy) {
-        System.out.println("com.pepe.games.chess.Chess.canKingMoveTo()");
+    private boolean isTile(int posx, int posy) {
+        boolean bool = false;
+        if(isWhite(posx, posy) || isBlack(posx, posy)) {
+            bool = true;
+        } else {
+            bool = false;
+        }
+        return bool;
+    }
+    
+    private boolean canKingMoveTo(String player, int posx, int posy) {        
         boolean bool = true;
         for(int x = 0; x < 8; x++) {
-            for(int y = 0; y < 8; y++) {
-                System.out.println("Loop Started");
+            for(int y = 0; y < 8; y++) {                
                 switch(player) {
-                    case "w":
-                        System.out.println("The player is w");
+                    case "w":                        
                         if(isBlack(x, y)) {
-                            System.out.println("One tile black in " + x + ":" + y);
-                            if(getKillingTiles(getTile(x, y), x, y)[posx][posy] == true) {
-                                bool = false;
-                                System.out.println("w | " + x + " | " + y + " | bool = false");
-                                break;
+                            if(getTile(x, y).equals("bPawn")) {
+                                // en caso de que sea peon
+                            } else {                                  
+                                if(getMovingTiles(getTile(x, y), x, y)[posx][posy] == true) {
+                                    bool = false;                                    
+                                    break;
+                                }
                             }
                         } else {
                             continue;
@@ -433,9 +467,13 @@ public class Chess extends JFrame {
                     
                     case "b":
                         if(isWhite(x, y)) {
-                            if(getKillingTiles(getTile(x, y), x, y)[posx][posy] == true) {
-                                bool = false;
-                                break;
+                            if(getTile(x, y).equals("wPawn")) {
+                                // en caso de que sea peon
+                            } else {                                  
+                                if(getMovingTiles(getTile(x, y), x, y)[posx][posy] == true) {
+                                    bool = false;                                    
+                                    break;
+                                }
                             }
                         } else {
                             continue;
@@ -444,6 +482,13 @@ public class Chess extends JFrame {
                 }
             }
         }
+        return bool;
+    }
+    
+    private boolean checkJaque(String player, int posx, int posy) {
+        boolean bool = false;
+        
+        
         return bool;
     }
     
@@ -476,13 +521,13 @@ public class Chess extends JFrame {
         if(playerW) {
             playerW = false;
             playerB = true;
-            setWhiteFalse();
-            setBlackTrue();
+            setWhite(false);
+            setBlack(true);
         } else if(playerB) {
             playerW = true;
             playerB = false;
-            setWhiteTrue();
-            setBlackFalse();
+            setWhite(true);
+            setBlack(false);
         }
     }
     
@@ -500,22 +545,22 @@ public class Chess extends JFrame {
         boolean color = true;
         int cont = 0;
         
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
                 if(color) {
                     if(cont >= 8) {
-                        Chess.TILES[i][j].setBackground(Color.LIGHT_GRAY);
+                        Chess.TILES[x][y].setBackground(Color.LIGHT_GRAY);
                         cont = 0;
                     } else {
-                        Chess.TILES[i][j].setBackground(Color.WHITE);
+                        Chess.TILES[x][y].setBackground(Color.WHITE);
                         color = false;                       
                     }
                 } else {
                     if(cont >= 8) {
-                        Chess.TILES[i][j].setBackground(Color.WHITE);
+                        Chess.TILES[x][y].setBackground(Color.WHITE);
                         cont = 0;
                     } else {
-                        Chess.TILES[i][j].setBackground(Color.LIGHT_GRAY);
+                        Chess.TILES[x][y].setBackground(Color.LIGHT_GRAY);
                         color = true;
                     }
                 }
@@ -524,67 +569,60 @@ public class Chess extends JFrame {
         }
     }
     
-    private void setAllNull() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                Chess.TILES[i][j].setEnabled(false);
+    private void setAllFalse() {
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                Chess.TILES[x][y].setEnabled(false);
             }
         }
     }
     
     private void setNullTileFalse() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(Chess.TILES[i][j].getIcon() == null) {
-                    Chess.TILES[i][j].setEnabled(false);
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(Chess.TILES[x][y].getIcon() == null) {
+                    Chess.TILES[x][y].setEnabled(false);
                 }
             }
         }
     }
     
-    private void setWhiteTrue() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if (isWhite(i, j)) {
-                    Chess.TILES[i][j].setEnabled(true);
+    private void setBlankTileFalse() {
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(Chess.TILES[x][y].getBackground() == Color.LIGHT_GRAY 
+                    || Chess.TILES[x][y].getBackground() == Color.WHITE) {
+                    if(!isTile(x, y)) {
+                        Chess.TILES[x][y].setEnabled(false);
+                    }
                 }
             }
         }
     }
     
-    private void setWhiteFalse() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if (isWhite(i, j)) {
-                    Chess.TILES[i][j].setEnabled(false);
-                }                
-            }
-        }
-    }
-    
-    private void setBlackTrue() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if (isBlack(i, j)) Chess.TILES[i][j].setEnabled(true);                
-            }
-        }
-    }
-    
-    private void setBlackFalse() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if (isBlack(i, j)) {
-                Chess.TILES[i][j].setEnabled(false);
+    private void setWhite(boolean bool) {
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if (isWhite(x, y)) {
+                    Chess.TILES[x][y].setEnabled(bool);
                 }
+            }
+        }
+    }
+    
+    private void setBlack(boolean bool) {
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if (isBlack(x, y)) Chess.TILES[x][y].setEnabled(bool);                
             }
         }
     }
     
     private void setMovingTiles() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(getMovingTiles(getTile(locationX, locationY), locationX, locationY)[i][j]) {
-                    Chess.TILES[i][j].setBackground(Color.YELLOW);
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(getMovingTiles(getTile(locationX, locationY), locationX, locationY)[x][y]) {
+                    Chess.TILES[x][y].setBackground(Color.YELLOW);
                 }
             }
         }
@@ -1247,6 +1285,7 @@ public class Chess extends JFrame {
                 }
             break;
         }
+        setBlankTileFalse();
         return bool;
     }
     
@@ -1261,48 +1300,56 @@ public class Chess extends JFrame {
         switch(tile) {
         // WHITE
             case "wKing":
+                // ABAJO
                 if(posx != 7) {
                     if (isBlack(posx + 1, posy)) {
                         update(bool, posx + 1, posy, "kill");
                     }
                 }
-
+                
+                // ARRIBA
                 if(posx != 0) {               
                     if (isBlack(posx - 1, posy)) {
                         update(bool, posx - 1, posy, "kill");
                     }
                 }
-
+                
+                // DERECHA
                 if(posy != 7) {                
                     if (isBlack(posx, posy + 1)) {
                         update(bool, posx, posy + 1, "kill");
                     }
                 }
-
+                
+                // IZQUIERDA
                 if(posy != 0) {                
                     if (isBlack(posx, posy - 1)) {
                         update(bool, posx, posy - 1, "kill");
                     }
                 }
-
+                
+                // ABAJO DERECHA
                 if(posx != 7 && posy != 7) {                
                     if (isBlack(posx + 1, posy + 1)) {
                         update(bool, posx + 1, posy + 1, "kill");
                     }
                 }
-
+                
+                // ABAJO IZQUIERDA
                 if(posx != 7 && posy != 0) {                
                     if (isBlack(posx + 1, posy - 1)) {
                         update(bool, posx + 1, posy - 1, "kill");
                     }
                 }
-
+                
+                // ARRIBA DERECHA
                 if(posx != 0 && posy != 7) {                
                     if (isBlack(posx - 1, posy + 1)) {
                         update(bool, posx - 1, posy + 1, "kill");
                     }
                 }
-
+                
+                // ARRIBA IZQUIERDA
                 if(posx != 0 && posy != 0) {                
                     if (isBlack(posx - 1, posy - 1)) {
                         update(bool, posx - 1, posy - 1, "kill");
@@ -1578,14 +1625,14 @@ public class Chess extends JFrame {
             break;
 
             case "wPawn":
-                // ATAQUE EN DIAGONAL SUPERIOR DERECHA
+                // ATAQUE DIAGONAL SUPERIOR DERECHA
                 if(posy < 7) {
                     if (isBlack(posx - 1, posy + 1)) {
                         update(bool, posx - 1, posy + 1, "kill");
                     }
                 }
                 
-                // ATAQUE EN DIAGONAL SUPERIOR IZQUIERDA
+                // ATAQUE DIAGONAL SUPERIOR IZQUIERDA
                 if(posy > 1) {
                     if (isBlack(posx - 1, posy - 1)) {
                         update(bool, posx - 1, posy - 1, "kill");
@@ -1936,6 +1983,7 @@ public class Chess extends JFrame {
                 }                    
             break;
         }
+        setBlankTileFalse();
         return bool;
     }
     
