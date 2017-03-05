@@ -111,6 +111,7 @@ public class Chess extends JFrame {
                 Chess.TILES[locationX][locationY].setEnabled(true);
                 setMovingTiles();
                 setKillingTiles();
+                
                 pressed = true;
             } else {
                 getPos(evt);
@@ -454,6 +455,11 @@ public class Chess extends JFrame {
                         if(isBlack(x, y)) {
                             if(getTile(x, y).equals("bPawn")) {
                                 // en caso de que sea peon
+                                if(getMovingTiles(getTile(x, y), x + 1, y + 1)[posx][posy] == true 
+                                || getMovingTiles(getTile(x, y), x + 1, y - 1)[posx][posy] == true) {
+                                    bool = false;                                    
+                                    break;
+                                }
                             } else {                                  
                                 if(getMovingTiles(getTile(x, y), x, y)[posx][posy] == true) {
                                     bool = false;                                    
@@ -469,6 +475,11 @@ public class Chess extends JFrame {
                         if(isWhite(x, y)) {
                             if(getTile(x, y).equals("wPawn")) {
                                 // en caso de que sea peon
+                                if(getMovingTiles(getTile(x, y), x - 1, y + 1)[posx][posy] == true 
+                                || getMovingTiles(getTile(x, y), x - 1, y - 1)[posx][posy] == true) {
+                                    bool = false;                                    
+                                    break;
+                                }
                             } else {                                  
                                 if(getMovingTiles(getTile(x, y), x, y)[posx][posy] == true) {
                                     bool = false;                                    
@@ -485,9 +496,37 @@ public class Chess extends JFrame {
         return bool;
     }
     
-    private boolean checkJaque(String player, int posx, int posy) {
+    private boolean isCheck(String player, int posx, int posy) {
         boolean bool = false;
-        
+        switch(player) {
+            case "w":
+                for(int x = 0; x < 8; x++) {
+                    for(int y = 0; y < 8; y++) {
+                        if(getKillingTiles(getTile(posx, posy), x, y)
+                        [getTilePos("x", "bKing")][getTilePos("y","bKing")] == true) {
+                            bool = true;
+                            break;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+            break;
+            
+            case "b":
+                for(int x = 0; x < 8; x++) {
+                    for(int y = 0; y < 8; y++) {
+                        if(getKillingTiles(getTile(posx, posy), x, y)
+                        [getTilePos("x", "wKing")][getTilePos("y","wKing")] == true) {
+                            bool = true;
+                            break;
+                        } else {
+                            continue;
+                        }
+                    }
+                }
+            break;
+        }
         
         return bool;
     }
@@ -629,10 +668,10 @@ public class Chess extends JFrame {
     }
     
     private void setKillingTiles() {
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                if(getKillingTiles(getTile(locationX, locationY), locationX, locationY)[i][j]) {
-                    Chess.TILES[i][j].setBackground(Color.RED);
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(getKillingTiles(getTile(locationX, locationY), locationX, locationY)[x][y]) {
+                    Chess.TILES[x][y].setBackground(Color.RED);
                 }
             }
         }
@@ -640,9 +679,9 @@ public class Chess extends JFrame {
     
     private boolean[][] getMovingTiles(String tile, int posx, int posy) {
         boolean[][] bool = new boolean[8][8];
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                bool[i][j] = false;
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                bool[x][y] = false;
             }
         }
         
@@ -1291,9 +1330,9 @@ public class Chess extends JFrame {
     
     private boolean[][] getKillingTiles(String tile, int posx, int posy) {        
         boolean[][] bool = new boolean[8][8];
-        for(int i = 0; i < 8; i++) {
-            for(int j = 0; j < 8; j++) {
-                bool[i][j] = false;
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                bool[x][y] = false;
             }
         }
         
@@ -1984,6 +2023,153 @@ public class Chess extends JFrame {
             break;
         }
         setBlankTileFalse();
+        return bool;
+    }
+    
+    private boolean[][] getCheckingTiles(String tile, int posx, int posy) {
+        boolean[][] bool = new boolean[8][8];
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                bool[x][y] = false;
+            }
+        }
+        
+        for(int x = 0; x < 8; x++) {
+            for(int y = 0; y < 8; y++) {
+                if(isBlack(x, y)) {
+                    if(getKillingTiles(getTile(x, y), x, y)
+                        [getTilePos("x", "wKing")][getTilePos("y", "wKing")] == true) {
+                        if(getKillingTiles(getTile(posx, posy), posx, posy)[x][y] == true) {
+                            update(bool, x, y, "kill");                            
+                        }
+                    }
+                }
+            }
+        }
+        switch(tile) {
+        // WHITE
+            case "wKing":
+                // ABAJO
+                if(posx != 7) {
+                    if(canKingMoveTo("w", posx + 1, posy) == true) {
+                        if(Chess.TILES[posx + 1][posy].getIcon() == null) {
+                            update(bool, posx + 1, posy, "move");
+                        }                   
+                    }
+                }
+                
+                
+                // ARRIBA
+                if(posx != 0) {
+                    if(canKingMoveTo("w", posx - 1, posy) == true) {
+                        if(Chess.TILES[posx - 1][posy].getIcon() == null) {
+                            update(bool, posx - 1, posy, "move");
+                        }                                  
+                    }
+                }
+                
+                // DERECHA
+                if(posy != 7) {
+                    if(canKingMoveTo("w", posx, posy + 1) == true) {
+                        if(Chess.TILES[posx][posy + 1].getIcon() == null) {                    
+                            update(bool, posx, posy + 1, "move");
+                        }
+                    }                    
+                }
+                
+                // IZQUIERDA
+                if(posy != 0) {
+                    if(canKingMoveTo("w", posx, posy - 1) == true) {
+                        if(Chess.TILES[posx][posy - 1].getIcon() == null) {
+                            update(bool, posx, posy - 1, "move");          
+                        }                   
+                    }
+                }
+                
+                // ABAJO DERECHA
+                if(posx != 7 && posy != 7) {
+                    if(canKingMoveTo("w", posx + 1, posy + 1) == true) {
+                        if(Chess.TILES[posx + 1][posy + 1].getIcon() == null) {
+                           update(bool, posx + 1, posy + 1, "move");
+                        }                  
+                    }
+                }
+                
+                // ABAJO IZQUIERDA
+                if(posx != 7 && posy != 0) {
+                    if(canKingMoveTo("w", posx + 1, posy - 1) == true) {
+                        if(Chess.TILES[posx + 1][posy - 1].getIcon() == null) {
+                           update(bool, posx + 1, posy - 1, "move");
+                        }        
+                    }
+                }
+                
+                // ARRIBA DERECHA
+                if(posx != 0 && posy != 7) {
+                    if(canKingMoveTo("w", posx - 1, posy + 1) == true) {
+                        if(Chess.TILES[posx - 1][posy + 1].getIcon() == null) {
+                           update(bool, posx - 1, posy + 1, "move");
+                        }
+                    }
+                }
+                
+                // ARRIBA IZQUIERDA
+                if(posx != 0 && posy != 0) {
+                    if(canKingMoveTo("w", posx - 1, posy - 1) == true) {
+                        if(Chess.TILES[posx - 1][posy - 1].getIcon() == null) {
+                           update(bool, posx - 1, posy - 1, "move");
+                        }                
+                    }
+                }
+            break;
+            
+            case "wQueen":
+                
+            break;
+
+            case "wBishop":
+                
+            break;
+
+            case "wKnight":
+                
+            break;
+
+            case "wRook":
+                
+            break;
+
+            case "wPawn":
+                
+            break;
+                
+                
+        // BLACK
+            case "bKing":
+                
+            break;
+
+            case "bQueen":
+                
+            break;
+
+            case "bBishop":
+                
+            break;
+
+            case "bKnight":
+                
+            break;
+
+            case "bRook":
+                
+            break;
+
+            case "bPawn":
+                                   
+            break;
+        }
+        
         return bool;
     }
     
