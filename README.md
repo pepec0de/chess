@@ -1,2 +1,2 @@
-# simplechessv1
+# chess
 Codigo de ajedrez
