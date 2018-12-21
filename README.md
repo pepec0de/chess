@@ -1,2 +1,1 @@
-# chess
-Codigo de ajedrez
+
