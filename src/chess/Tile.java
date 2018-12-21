@@ -3,7 +3,7 @@ package chess;
 import javax.swing.*;
 
 /**
- * USELESS CLASS
+ * UNUSED CLASS
  * @author Pepe
  */
 public class Tile extends JButton {
