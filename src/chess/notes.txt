@@ -1,0 +1,91 @@
+------------------------------------------------------------------------------------------------------------------------------
+Metodo simple para sacar la ruta (linea 11)
+------------------------------------------------------------------------------------------------------------------------------
+// ARRIBA DERECHA (x - I, y + I)
+// BLOCK TYPE: BISHOP
+for(int i = 1; i < 8; i++) {
+    // Check if IndexOutofBounds doesnt happen
+    if( ((posx - i) >= 0 && (posx - i) <= 7) && ((posy + i) >= 0 && (posy + i) <= 7) ) {
+        if(Chess.tilesHandler.isWhite(posx - i, posy + i)) {
+            break;
+        } else if(Chess.tilesHandler.isBlack(posx - i, posy + i)) {
+            Chess.tilesHandler.update(bool, posx - i, posy + i);
+            // TODO: Make (Get) Route to that tile
+            for(int j = 1; j < 8; j++) {
+                if( !( (posx - j == posx - i) && (posy + j == posy + i) ) ) {
+                    Chess.tilesHandler.update(bool, posx - j, posy + j);
+                } else {
+                    break;
+                }
+            }
+            break;                            
+        }
+    }                    
+}
+------------------------------------------------------------------------------------------------------------------------------
+Prueba para reducir lineas de codigo
+------------------------------------------------------------------------------------------------------------------------------
+if(!Chess.tilesHandler.isTile(xi, yi)) {
+    Chess.tilesHandler.update(bool, xi, yi);
+} else {
+    if(Chess.tilesHandler.isWhite(posx, posy)) {
+        if(Chess.tilesHandler.isWhite(xi, yi)) {
+            break;
+        } else if(Chess.tilesHandler.isBlack(xi, yi)) {
+            Chess.tilesHandler.update(bool, xi, yi);
+            break;
+        }
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------
+BlockingCheckTiles - Stamento importante (switch de las direcciones)
+------------------------------------------------------------------------------------------------------------------------------
+switch(fDirX) {
+case -1:
+    switch(fDirY) {
+        case -1:                            
+            // ARRIBA IZQUIERDA (x - I, y - I)                            
+            break;
+
+        case 0:                            
+            // ARRIBA (x - I, y)                           
+            break;
+
+        case 1:
+            // ARRIBA DERECHA (x - I, y + I)
+            break;
+    }
+    break;
+
+case 0:
+    switch(fDirY) {
+        case -1:
+            // IZQUIERDA (x, y - I)
+            break;
+
+        case 0:
+            // Esto es imposible que suceda, ya que es la misma posicion que la original
+            throw new Exception("Esto es imposible que suceda");
+
+        case 1:
+            // DERECHA (x, y + I)
+            break;
+    }
+    break;
+
+case 1:
+    switch(fDirY) {
+        case -1:
+            // ABAJO IZQUIERDA (x + I, y - I)                           
+            break;
+
+        case 0:
+            // ABAJO (x + I, y)                     
+            break;
+
+        case 1:
+            // ABAJO DERECHA (x + I, y + I)
+            break;
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------
