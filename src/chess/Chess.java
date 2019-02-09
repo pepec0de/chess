@@ -6,7 +6,7 @@ import java.awt.event.*;
 
 /**
  *
- * @author Pepe
+ * @author pepe
  */
 public class Chess extends JFrame {
     
