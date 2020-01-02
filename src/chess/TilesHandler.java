@@ -69,7 +69,7 @@ public class TilesHandler {
                                  *  Este condicional sirve porque el peon es la unica pieza
                                  *  que no se puede mover a las mismas posiciones a las
                                  *  que ataque en un caso de movimiento normal y por eso se
-                                 *  necesita hacer estos 2 condicionales para cada esquina en
+                                 *  necesita hacer estos 2 condicionales para cada "diagonal" en
                                  *  la que puede haber una posibilidad de ataque
                                 **/
                                 if(y <= 6) {
