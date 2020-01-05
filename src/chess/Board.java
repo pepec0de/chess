@@ -6,21 +6,7 @@ import javax.swing.*;
 
 public class Board extends JPanel {
 
-	// Resources
-	public static final ImageIcon ICONbKing = new ImageIcon(Assets.chssICON_bKING);
-	public static final ImageIcon ICONbQueen = new ImageIcon(Assets.chssICON_bQUEEN);
-	public static final ImageIcon ICONbBishop = new ImageIcon(Assets.chssICON_bBISHOP);
-	public static final ImageIcon ICONbKnight = new ImageIcon(Assets.chssICON_bKNIGHT);
-	public static final ImageIcon ICONbRook = new ImageIcon(Assets.chssICON_bROOK);
-	public static final ImageIcon ICONbPawn = new ImageIcon(Assets.chssICON_bPAWN);
-	public static final ImageIcon ICONwKing = new ImageIcon(Assets.chssICON_wKING);
-	public static final ImageIcon ICONwQueen = new ImageIcon(Assets.chssICON_wQUEEN);
-	public static final ImageIcon ICONwBishop = new ImageIcon(Assets.chssICON_wBISHOP);
-	public static final ImageIcon ICONwKnight = new ImageIcon(Assets.chssICON_wKNIGHT);
-	public static final ImageIcon ICONwRook = new ImageIcon(Assets.chssICON_wROOK);
-	public static final ImageIcon ICONwPawn = new ImageIcon(Assets.chssICON_wPAWN);
-
-	// Grid
+	// Rejilla
 	public static Tile[][] TILES = new Tile[8][8];
 	// Posicion actual que se ha pulsado
 	private int locationX, locationY;
@@ -58,6 +44,7 @@ public class Board extends JPanel {
             }
         }
         tilesHandler.repaint();
+        tilesHandler.setAllTiles(false);
 	}
 	
 	ActionListener tileListener = new ActionListener() {
@@ -65,52 +52,52 @@ public class Board extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			// TODO Auto-generated method stub
-			
+			JOptionPane.showMessageDialog(null, "que pasa bro");
 		}
 	};
 	
-	private void startGame() {
+	public void startGame() {
         this.isGameOver = false;
         init();
         
         // Clean grid from icons
         for(int x = 0; x < 8; x++) {
             for(int y = 0; y < 8; y++) {
-                TILES[x][y].setIcon(null);
+                TILES[x][y].setPiece("null");
             }
         }
         // BLACK
         
         // Set start position
-        TILES[0][0].setIcon(ICONbRook);
-        TILES[0][1].setIcon(ICONbKnight);
-        TILES[0][2].setIcon(ICONbBishop);
-        TILES[0][3].setIcon(ICONbQueen);
-        TILES[0][4].setIcon(ICONbKing);
-        TILES[0][5].setIcon(ICONbBishop);
-        TILES[0][6].setIcon(ICONbKnight);
-        TILES[0][7].setIcon(ICONbRook);
+        TILES[0][0].setPiece("bRook");
+        TILES[0][1].setPiece("bKnight");
+        TILES[0][2].setPiece("bBishop");
+        TILES[0][3].setPiece("bQueen");
+		TILES[0][4].setPiece("bKing");
+		TILES[0][5].setPiece("bBishop");
+		TILES[0][6].setPiece("bKnight");
+		TILES[0][7].setPiece("bRook");
         for (int i = 0; i < 8; i++) {
-            TILES[1][i].setIcon(ICONbPawn);
+            TILES[1][i].setPiece("bPawn");
         }
 
         // WHITE
         
         // Set start position
-        TILES[7][0].setIcon(ICONwRook);
-        TILES[7][1].setIcon(ICONwKnight);
-        TILES[7][2].setIcon(ICONwBishop);
-        TILES[7][3].setIcon(ICONwQueen);
-        TILES[7][4].setIcon(ICONwKing);
-        TILES[7][5].setIcon(ICONwBishop);
-        TILES[7][6].setIcon(ICONwKnight);
-        TILES[7][7].setIcon(ICONwRook);
+        TILES[7][0].setPiece("wRook");
+        TILES[7][1].setPiece("wKnight");
+        TILES[7][2].setPiece("wBishop");
+        TILES[7][3].setPiece("wQueen");
+		TILES[7][4].setPiece("wKing");
+		TILES[7][5].setPiece("wBishop");
+		TILES[7][6].setPiece("wKnight");
+		TILES[7][7].setPiece("wRook");
         for (int i = 0; i < 8; i++) {
-            TILES[6][i].setIcon(ICONwPawn);
+            TILES[6][i].setPiece("wPawn");
         }
         
         tilesHandler.repaint();
         tilesHandler.setAllTiles(false);
-        tilesHandler.setWhite(true);
+        tilesHandler.setWhiteTeam(true);
 	}
 }

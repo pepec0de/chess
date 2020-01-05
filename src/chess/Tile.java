@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class Tile extends JButton {
 	
-	private String tile;
+	private String piece;
 	private int X;
 	private int Y;
 	
@@ -13,14 +13,30 @@ public class Tile extends JButton {
 	private boolean canDoShortCastling;
 	private boolean canDoLongCastling;
 	
-	public Tile() {}
-	
-	public void setTile(String tile) {
-		this.tile = tile;
+	public Tile() {
+		// To avoid NullPointerExcep
+		this.piece = "-";
 	}
 	
-	public String getTile() {
-		return this.tile;
+	public boolean hasPiece() {
+		return !piece.equals("null");
+	}
+	
+	public void setPiece(String piece) {
+		this.piece = piece;
+		if(piece.equals("null")) {
+			setIcon(null);
+		} else {						
+			setIcon(Chess.ICONS.get(this.piece));
+		}
+	}
+	
+	public String getPiece() {
+		return this.piece;
+	}
+	
+	public String getTeam() {
+		return this.piece.substring(0, 1);
 	}
 	
 	public void setLocX(int x) {

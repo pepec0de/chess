@@ -1,3 +1,6 @@
+Black
+White
+-----
 King
 Queen
 Bishop
