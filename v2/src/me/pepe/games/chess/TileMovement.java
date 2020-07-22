@@ -372,7 +372,6 @@ public class TileMovement {
 			}
 			break;
 		}
-		Board.tilesHandler.setBlankTiles(false);
 		return bool;
 	}
 	
@@ -383,7 +382,6 @@ public class TileMovement {
 				bool[x][y] = false;
 			}
 		}
-		Board.tilesHandler.setBlankTiles(false);
 		return bool;
 	}
 }
