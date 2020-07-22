@@ -1,0 +1,9 @@
+Black
+White
+-----
+King
+Queen
+Bishop
+Knight
+Rook
+Pawn
